@@ -170,7 +170,7 @@ module JSONAPI
 
         sort_fields = options.dig(:_relation_helper_options, :sort_fields)
         sort_fields.try(:each) do |field|
-          pluck_fields << Arel.sql(field)
+          pluck_fields << Arel.sql(field) unless field == 'random()'
         end
 
         rows = records.pluck(*pluck_fields)
@@ -761,7 +761,7 @@ module JSONAPI
           records = call_method_or_proc(strategy, records, direction, context)
         else
           join_manager = options.dig(:_relation_helper_options, :join_manager)
-          sort_field = join_manager ? get_aliased_field(field, join_manager) : field
+          sort_field = (field != 'random()' && join_manager) ? get_aliased_field(field, join_manager) : field
           options[:_relation_helper_options][:sort_fields].push("#{sort_field}")
           records = records.order(Arel.sql("#{sort_field} #{direction}"))
         end
